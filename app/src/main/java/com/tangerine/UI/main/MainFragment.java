@@ -7,6 +7,7 @@ import androidx.appcompat.widget.AppCompatButton;
 import androidx.appcompat.widget.AppCompatTextView;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.tangerine.UI.main.map.MapFragment;
 import com.tangerine.location.R;
 import com.tangerine.location.fragment.ShowFragment;
 
