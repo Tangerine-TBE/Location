@@ -1,0 +1,92 @@
+apply plugin: 'com.android.application'
+apply plugin: 'com.jakewharton.butterknife'
+
+def realseTime(){
+    return new Date().format("yyyy-MM-dd",TimeZone.getTimeZone("UTC"))
+}
+def bugly_id_debug= ""
+def bugly_id_release =""
+
+
+
+
+
+android {
+    compileSdkVersion 29
+    buildToolsVersion "29.0.2"
+    aaptOptions.cruncherEnabled = false
+    aaptOptions.useNewCruncher = false
+    defaultConfig {
+        applicationId "com.tangerine.location"
+        minSdkVersion 15
+        targetSdkVersion 29
+        versionCode 1
+        versionName "1.0.0"
+        multiDexEnabled true
+        buildConfigField "Boolean","DEBUGGABLE","TRUE"//调试
+        vectorDrawables.useSupportLibrary = true
+
+        ndk{
+            abiFilters 'armeabi','armeabi-v7a'
+        }
+    }
+    signingConfigs {
+        release {
+            storeFile file('D:\\androidProjects\\Location\\tangerine.jks')
+            storePassword 'tan100344'
+            keyAlias 'location'
+            keyPassword 'tan100344'
+        }
+    }
+
+    buildTypes {
+        release {
+            buildConfigField "Boolean","DEBUGGABLE","false"
+            buildConfigField "String","BUGLY_ID","\"${bugly_id_release}\""
+            debuggable false
+            minifyEnabled false
+            signingConfig signingConfigs.release
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+        debug{
+            buildConfigField "Boolean","DEBUGGABLE","true"
+            buildConfigField "String","BUGLY_ID","\"${bugly_id_debug}\""
+            debuggable true
+
+        }
+    }
+    sourceSets.main{
+        jniLibs.srcDirs = ['libs']
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+}
+
+dependencies {
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
+    implementation 'androidx.appcompat:appcompat:1.1.0'
+    implementation 'androidx.constraintlayout:constraintlayout:1.1.3'
+    implementation 'androidx.coordinatorlayout:coordinatorlayout:1.1.0'
+    implementation 'androidx.core:core:1.0.0'
+    implementation 'androidx.legacy:legacy-support-v4:1.0.0'
+    implementation 'com.google.android.material:material:1.0.0'
+    implementation 'me.yokeyword:fragmentationx:1.0.2'
+    // Swipeback is based on fragmentation. Refer to SwipeBackActivity/Fragment for your Customized SupportActivity/Fragment
+    implementation 'me.yokeyword:fragmentationx-swipeback:1.0.2'
+    // To simplify the communication between Fragments.
+    implementation 'com.jakewharton:butterknife:10.0.0'
+    implementation 'com.github.bumptech.glide:glide:4.10.0'
+    annotationProcessor 'com.github.bumptech.glide:compiler:4.10.0'
+    annotationProcessor 'com.jakewharton:butterknife-compiler:10.0.0'
+    implementation 'com.joanzapata.iconify:android-iconify-fontawesome:2.2.2', {
+        exclude group: 'com.android.support'
+    }
+    implementation 'com.joanzapata.iconify:android-iconify-ionicons:2.2.2', {
+        exclude group: 'com.android.support'
+    }
+    implementation 'com.google.android.material:material:1.0.0-rc01'
+    implementation files('libs/BaiduLBS_Android.jar')
+}

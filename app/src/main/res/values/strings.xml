@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">Location</string>
+    <string name="app_behavior">com.tangerine.location.weight.AppBehavior</string>
+    <string name = "cardView_behavior">com.tangerine.location.weight.CardViewSimpleBehavior</string>
+</resources>
