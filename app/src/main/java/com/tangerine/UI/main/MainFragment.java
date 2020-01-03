@@ -1,17 +1,29 @@
 package com.tangerine.UI.main;
 
+import android.Manifest;
+import android.annotation.SuppressLint;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.location.Location;
+import android.location.LocationListener;
 import android.location.LocationManager;
+import android.os.Build;
 import android.os.Bundle;
+import android.os.SystemClock;
+import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 
 import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.widget.AppCompatButton;
 import androidx.appcompat.widget.AppCompatTextView;
+import androidx.core.content.ContextCompat;
 import androidx.core.location.LocationManagerCompat;
+import androidx.core.view.KeyEventDispatcher;
 
 import com.baidu.location.Address;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -28,8 +40,9 @@ import org.greenrobot.eventbus.ThreadMode;
 import butterknife.BindView;
 
 
-public class MainFragment extends ShowFragment implements View.OnClickListener {
+public class MainFragment extends ShowFragment implements View.OnClickListener, LocationListener {
     private static final String TAG = "MainFragment";
+    private static final String mLocationProvider = LocationManager.GPS_PROVIDER;
     @BindView(R.id.fb_add_area)
     FloatingActionButton btnArea = null;
     @BindView(R.id.btn_start)
@@ -45,7 +58,9 @@ public class MainFragment extends ShowFragment implements View.OnClickListener {
     AppCompatTextView tvTarProvince = null;
     @BindView(R.id.tag)
     AppCompatTextView tvTarTag = null;
-
+    private LocationManager mLocationManager;
+    private double longitude;
+    private double latitude;
 
 
     @Override
@@ -62,10 +77,11 @@ public class MainFragment extends ShowFragment implements View.OnClickListener {
     public void onLazyInitView(@Nullable Bundle savedInstanceState) {
 
     }
-    private void initView(){
+
+    private void initView() {
         btnStart.setOnClickListener(this);
         btnArea.setOnClickListener(this);
-        if (TextUtils.isEmpty(tvTarCountry.getText().toString())){
+        if (TextUtils.isEmpty(tvTarCountry.getText().toString())) {
             tvTarCountry.setVisibility(View.INVISIBLE);
             tvTarProvince.setVisibility(View.INVISIBLE);
             tvTarTag.setVisibility(View.INVISIBLE);
@@ -90,41 +106,133 @@ public class MainFragment extends ShowFragment implements View.OnClickListener {
 
     @Override
     public void onClick(View v) {
-        switch (v.getId()){
+        switch (v.getId()) {
             case R.id.fb_add_area:
-                Intent intent = new Intent(getBaseActivity(),MapActivity.class);
+                Intent intent = new Intent(getBaseActivity(), MapActivity.class);
                 startActivity(intent);
                 break;
             case R.id.btn_start:
-                LocationManager locationManager = (LocationManager) getBaseActivity().getSystemService(Context.LOCATION_SERVICE);
+                initLocationManager();
+                setLocation(longitude, latitude);
                 break;
-                default:
-                    break;
+            default:
+                break;
         }
     }
+
     @Subscribe(threadMode = ThreadMode.MAIN)
-    public void onEventInfoChange(MapInfoEvent event){
-        if (event != null){
+    public void onEventInfoChange(MapInfoEvent event) {
+        if (event != null) {
             Address address = event.address;
             MapInfo mapInfo = event.mapInfo;
+            latitude = mapInfo.x;
+            longitude = mapInfo.y;
             setData(address, mapInfo);
-            Log.e(TAG, "onMapInfoChangeEvent: " + address.address  + mapInfo.y + mapInfo.x );
+            Log.e(TAG, "onMapInfoChangeEvent: " + address.address + mapInfo.y + mapInfo.x);
         }
     }
-    private void setData(Address address,MapInfo mapInfo){
+
+    private void setData(Address address, MapInfo mapInfo) {
         String strAddress = address.address;
         String country = address.country;
         String province = address.province;
-        tvTarAddress.setText(strAddress.replace(country,"").replace(province,""));
+        tvTarAddress.setText(strAddress.replace(country, "").replace(province, ""));
         tvTarCountry.setText(country);
         tvTarProvince.setText(province);
         tvTarCoordinate.setText(mapInfo.x + "，" + mapInfo.y);
-        if (tvTarTag.getVisibility() == View.INVISIBLE){
+        if (tvTarTag.getVisibility() == View.INVISIBLE) {
             tvTarCountry.setVisibility(View.VISIBLE);
             tvTarProvince.setVisibility(View.VISIBLE);
             tvTarTag.setVisibility(View.VISIBLE);
             tvTarCoordinate.setVisibility(View.VISIBLE);
 
+        }
+    }
+
+    private boolean changeLocation() {
+        LocationManager mLocationManager = (LocationManager) _mActivity.getSystemService(Context.LOCATION_SERVICE);
+        if (!mLocationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+            return false;
+        }
+        try {
+            mLocationManager.addTestProvider(LocationManager.GPS_PROVIDER, false, false, false, false, true, true, true, 0, 5);
+            mLocationManager.setTestProviderEnabled(LocationManager.GPS_PROVIDER, true);
+
+        } catch (Exception e) {
+            return false;
+        }
+        return true;
+    }
+
+    private void openGpsSettingEvent() {
+        Intent callGpsSettingIntent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+        _mActivity.startActivity(callGpsSettingIntent);
+    }
+
+    @SuppressLint("MissingPermission")
+    private void initLocationManager() {
+        mLocationManager = (LocationManager) _mActivity.getSystemService(Context.LOCATION_SERVICE);
+        assert mLocationManager != null;
+        mLocationManager.addTestProvider(mLocationProvider, false, true, false, true, true, true, true, 0, 5);
+        mLocationManager.setTestProviderEnabled(mLocationProvider, true);
+        mLocationManager.requestLocationUpdates(mLocationProvider, 0, 0, this);
+    }
+    private void openTestProviderLocationException(){
+        Intent intent = new Intent("//");
+        ComponentName cm = new ComponentName("com.android.settings","com.android.setting.DevelopmentSetting");
+        intent.setComponent(cm);
+        intent.setAction("android.intent.action.VIEW");
+        _mActivity.startActivity(intent);
+    }
+
+    @Override
+    public void onLocationChanged(Location location) {
+        double lat = location.getLatitude();
+        double lng = location.getLongitude();
+        Log.e("gps", String.format("location: x=%s y=%s", lat, lng));
+
+    }
+
+    @Override
+    public void onStatusChanged(String provider, int status, Bundle extras) {
+
+    }
+
+    @Override
+    public void onProviderEnabled(String provider) {
+
+    }
+
+    @Override
+    public void onProviderDisabled(String provider) {
+
+    }
+    @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR1)
+    private void setLocation(double longitude, double latitude){
+        Location location = new Location(mLocationProvider);
+        location.setTime(System.currentTimeMillis());
+        location.setLatitude(latitude);
+        location.setLongitude(longitude);
+        location.setElapsedRealtimeNanos(SystemClock.elapsedRealtimeNanos());
+        location.setAltitude(2.0f);
+        location.setAccuracy(3.0f);
+        mLocationManager.setTestProviderLocation(mLocationProvider,location);
+    }
+
+    private class ChangeLocationTask implements  Runnable{
+        private boolean run = true;
+        public void stop(){
+            run = false;
+        }
+        @Override
+        public void run() {
+            while (run){
+                try {
+                    Thread.sleep(1000);
+                }catch (Exception e){
+                    return;
+                }
+            }
         }
     }
 }
