@@ -1,10 +1,13 @@
 package com.tangerine.location.activity;
 
+import android.Manifest;
 import android.annotation.SuppressLint;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.ContentFrameLayout;
+import androidx.core.content.ContextCompat;
 
 import com.tangerine.location.R;
 import com.tangerine.location.fragment.ShowFragment;

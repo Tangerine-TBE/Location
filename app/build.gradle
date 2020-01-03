@@ -33,9 +33,9 @@ android {
     signingConfigs {
         release {
             storeFile file('D:\\androidProjects\\Location\\tangerine.jks')
-            storePassword 'tan100344'
+            storePassword '100344'
             keyAlias 'location'
-            keyPassword 'tan100344'
+            keyPassword '100344'
         }
     }
 
