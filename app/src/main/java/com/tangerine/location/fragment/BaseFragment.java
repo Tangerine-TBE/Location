@@ -10,6 +10,8 @@ import androidx.annotation.Nullable;
 
 import com.tangerine.location.activity.BaseActivity;
 
+import org.greenrobot.eventbus.EventBus;
+
 import butterknife.ButterKnife;
 import butterknife.Unbinder;
 import me.yokeyword.fragmentation_swipeback.SwipeBackFragment;
@@ -38,6 +40,7 @@ public abstract class BaseFragment extends SwipeBackFragment {
     public BaseActivity getBaseActivity(){
         return (BaseActivity) _mActivity;
     }
+
 
     @Override
     public void onDestroy() {

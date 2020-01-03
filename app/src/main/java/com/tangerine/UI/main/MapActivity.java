@@ -1,13 +1,18 @@
 package com.tangerine.UI.main;
 
-import android.app.Activity;
 import android.os.Bundle;
-import android.util.Log;
+import android.os.Handler;
+import android.os.Message;
+import android.view.View;
+import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
 
+import com.baidu.location.Address;
+import com.baidu.location.BDAbstractLocationListener;
 import com.baidu.location.BDLocation;
-import com.baidu.location.BDLocationListener;
 import com.baidu.location.LocationClient;
 import com.baidu.location.LocationClientOption;
 import com.baidu.mapapi.map.BaiduMap;
@@ -16,26 +21,30 @@ import com.baidu.mapapi.map.MapStatusUpdateFactory;
 import com.baidu.mapapi.map.MapView;
 import com.baidu.mapapi.map.MyLocationData;
 import com.baidu.mapapi.model.LatLng;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.tangerine.UI.eventBean.MapInfoEvent;
+import com.tangerine.UI.infoBean.MapInfo;
 import com.tangerine.location.R;
 
-public class MapActivity extends Activity {
-    public static final String TAG = "dddjjjccc";
-    private MapView mMapView;
+import org.greenrobot.eventbus.EventBus;
+
+import java.lang.ref.WeakReference;
+
+
+public class MapActivity extends AppCompatActivity implements View.OnClickListener {
+    private MapView mapView;
+    private static final int GET_LOCATION_SUCCESS = 20;
     private BaiduMap mBaiduMap;
-    //显示定位点
-    //定位类
+    private boolean isFirstLo = true;
     private LocationClient mLocationClient;
-    //是否是第一次定位
-    private boolean isFirstLoc = true;
-    //定位回调
-    private BDLocationListener mBDLocationListener = new     BDLocationListener() {
+    private MapInfo mapInfo;
+    private MyHandler myHandler;
+    private Address address ;
+    private BDAbstractLocationListener mBDAbstractLocationListener =new BDAbstractLocationListener() {
         @Override
         public void onReceiveLocation(BDLocation bdLocation) {
-
-            Log.d(TAG, "SUCCESS: ");
-            //定位成功后回调该方法
-            //BDLocation封装了定位相关的各种信息
-
+            //获取当前定位信息
+            mapInfo = new MapInfo(bdLocation.getLatitude(),bdLocation.getLongitude());
             //构造定位数据
             MyLocationData data = new MyLocationData.Builder()
                     .accuracy(bdLocation.getRadius())//定位精度
@@ -43,31 +52,21 @@ public class MapActivity extends Activity {
                     .longitude(bdLocation.getLongitude())//经度
                     .direction(100)//方向 可利用手机方向传感器获取 此处为方便写死
                     .build();
-            //设置定位数据
             mBaiduMap.setMyLocationData(data);
-
-            //配置定位图层显示方式
-            //有两个不同的构造方法重载 分别为三个参数和五个参数的
-            //这里主要讲一下常用的三个参数的构造方法
-            //三个参数：LocationMode(定位模式：罗盘，跟随),enableDirection（是否允许显示方向信息）
-            // ,customMarker（自定义图标）
-//            MyLocationConfiguration configuration = new MyLocationConfiguration(
-//                    MyLocationConfiguration.LocationMode.NORMAL, false, mMarker);
-//
-//            mBaiduMap.setMyLocationConfiguration(configuration);
-
             LatLng ll = new LatLng(bdLocation.getLatitude(), bdLocation.getLongitude());
-            //第一次定位需要更新下地图显示状态
-            if (isFirstLoc) {
-                isFirstLoc = false;
+            if (isFirstLo) {
+
+                isFirstLo = false;
                 MapStatus.Builder builder = new MapStatus.Builder()
                         .target(ll)//地图缩放中心点
-                        .zoom(21f);//缩放倍数 百度地图支持缩放21级 部分特殊图层为20级
+                        .zoom(20f);//缩放倍数 百度地图支持缩放21级 部分特殊图层为20级
                 //改变地图状态
                 mBaiduMap.setMapStatus(MapStatusUpdateFactory.newMapStatus(builder.build()));
+                 address = bdLocation.getAddress();
+                Message message = new Message();
+                message.what = GET_LOCATION_SUCCESS;
+                myHandler.sendMessage(message);
             }
-
-
         }
     };
 
@@ -75,17 +74,11 @@ public class MapActivity extends Activity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.fragment_map_layout);
-        //初始化试图
+        myHandler = new MyHandler(this);
         initView();
-        //初始化定位相关
         initLoc();
-        //开始定位
         mLocationClient.start();
     }
-
-    /**
-     * 定位设置
-     */
     private void initLoc() {
 
         //开启定位图层
@@ -94,10 +87,7 @@ public class MapActivity extends Activity {
         LocationClientOption option = new LocationClientOption();
         option.setLocationMode(LocationClientOption.LocationMode.Hight_Accuracy);
         //可选，默认高精度，设置定位模式，高精度，低功耗，仅设备
-
         option.setCoorType("bd09ll");
-        //可选，默认gcj02，设置返回的定位结果坐标系
-        //共有三种坐标可选
         //1. gcj02：国测局坐标；
         //2. bd09：百度墨卡托坐标；
         //3. bd09ll：百度经纬度坐标；
@@ -124,54 +114,76 @@ public class MapActivity extends Activity {
         option.setIgnoreKillProcess(false);
         //可选，默认true，定位SDK内部是一个SERVICE，并放到了独立进程，设置是否在stop的时候杀死这个进程，默认不杀死
 
-//        option.SetIgnoreCacheException(false);
+        option.SetIgnoreCacheException(false);
         //可选，默认false，设置是否收集CRASH信息，默认收集
 
-//        option.setEnableSimulateGps(false);
+        option.setEnableSimulateGps(false);
         //可选，默认false，设置是否需要过滤GPS仿真结果，默认需要
 
         //加载设置
         mLocationClient.setLocOption(option);
-
     }
 
-    private void initView() {
-        //地图显示控件 同时需要处理它的生命周期
-        mMapView = (MapView) findViewById(R.id.mapId);
-        //获取BadiuMap实例 地图控制器类
-        mBaiduMap = mMapView.getMap();
-        mLocationClient = new LocationClient(this);
-        //注册定位回调
-        mLocationClient.registerLocationListener(mBDLocationListener);
-
-        //覆盖物 用于显示当前位置
-//        mMarker = BitmapDescriptorFactory.fromResource(R.drawable.icon_start);
-    }
 
     @Override
-    protected void onResume() {
-        super.onResume();
-        mMapView.onResume();
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-        mMapView.onPause();
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
-        if (mLocationClient.isStarted()) {
-            mLocationClient.stop();
+    public void onClick(View v) {
+        switch (v.getId()){
+            case R.id.addInfo:
+                EventBus.getDefault().post(new MapInfoEvent(address,mapInfo));
+                finish();
+                break;
+                default:
+                    break;
         }
     }
+    private void initView(){
+        mapView = findViewById(R.id.mapId);
+        FloatingActionButton addInfo = findViewById(R.id.addInfo);
+        mBaiduMap =mapView.getMap();
+        mLocationClient = new LocationClient(this);
+        mLocationClient.registerLocationListener(mBDAbstractLocationListener);
+        addInfo.setOnClickListener(this);
+    }
+    private static class MyHandler extends Handler {
+        private WeakReference<MapActivity> weakReference;
+
+        MyHandler(MapActivity mapActivity){
+            weakReference = new WeakReference<>(mapActivity);
+        }
+        @Override
+        public void handleMessage(@NonNull Message msg) {
+            MapActivity mapActivity = weakReference.get();
+            if (mapActivity == null){
+                return;
+            }
+            if (msg.what == GET_LOCATION_SUCCESS){
+                mapActivity.ToastInfo();
+            }
+        }
+    }
+    private void ToastInfo(){
+        Toast.makeText(this, "获取当前定位成功",Toast.LENGTH_LONG).show();
+    }
+    @Override
+    public void onResume() {
+        mapView.onResume();
+        super.onResume();
+
+    }
 
     @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        mMapView.onDestroy();
+    public void onPause() {
+        mapView.onPause();
+        super.onPause();
 
+    }
+
+    @Override
+    public void onDestroy() {
+        mLocationClient.stop();
+        mBaiduMap.setMyLocationEnabled(false);
+        mapView.onDestroy();
+        mapView = null;
+        super.onDestroy();
     }
 }

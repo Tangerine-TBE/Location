@@ -54,11 +54,13 @@
         android:layout_height="wrap_content"
         android:layout_marginRight="50dp"
         android:src="@mipmap/add"
-        app:layout_anchor="@id/appbar"
-        app:layout_anchorGravity="bottom|right"
+        app:layout_anchor="@id/linearLayoutCompat"
+        app:layout_anchorGravity="top|right"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior"
         android:layout_marginEnd="50dp" />
 
     <androidx.appcompat.widget.LinearLayoutCompat
+        android:id="@+id/linearLayoutCompat"
         android:layout_width="match_parent"
         app:layout_behavior="@string/cardView_behavior"
         android:layout_height="wrap_content"
@@ -89,8 +91,10 @@
                     android:id="@+id/tv_target_address"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:ellipsize="end"
+                    android:singleLine="true"
                     android:layout_marginTop="16dp"
-                    android:text="模拟位置信息"
+                    android:text="@string/address_info"
                     android:textSize="20sp"
                     android:textStyle="bold" />
 
@@ -103,12 +107,12 @@
                         android:id="@+id/tv_target_province"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="佛山"
                         android:textStyle="bold" />
 
                     <androidx.appcompat.widget.AppCompatTextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:id="@+id/tag"
                         android:text="·"
                         android:textStyle="bold" />
 
@@ -116,7 +120,6 @@
                         android:id="@+id/tv_target_country"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="中国"
                         android:textStyle="bold" />
                 </androidx.appcompat.widget.LinearLayoutCompat>
 
@@ -144,9 +147,11 @@
                     android:layout_height="wrap_content">
 
                     <androidx.appcompat.widget.AppCompatButton
+                        android:layout_marginTop="14dp"
                         android:id="@+id/btn_start"
+                        android:background="@drawable/btn_style_backgound"
                         android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
+                        android:layout_height="28dp"
                         android:text="启动模拟" />
                 </androidx.appcompat.widget.LinearLayoutCompat>
 

@@ -12,6 +12,7 @@ import androidx.core.content.ContextCompat;
 import com.tangerine.location.R;
 import com.tangerine.location.fragment.ShowFragment;
 
+import me.yokeyword.eventbusactivityscope.EventBusActivityScope;
 import me.yokeyword.fragmentation.SupportActivity;
 
 public abstract class BaseActivity extends SupportActivity {
@@ -36,5 +37,15 @@ public abstract class BaseActivity extends SupportActivity {
         super.onDestroy();
         System.gc();
         System.runFinalization();
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
     }
 }
