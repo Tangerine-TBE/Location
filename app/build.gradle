@@ -18,7 +18,7 @@ android {
     aaptOptions.useNewCruncher = false
     defaultConfig {
         applicationId "com.tangerine.location"
-        minSdkVersion 15
+        minSdkVersion 21
         targetSdkVersion 29
         versionCode 1
         versionName "1.0.0"
@@ -37,6 +37,12 @@ android {
             keyAlias 'location'
             keyPassword '100344'
         }
+    }
+    lintOptions {
+        checkReleaseBuilds false
+        // Or, if you prefer, you can continue to check for errors in release builds,
+        // but continue the build even when errors are found:
+        abortOnError false
     }
 
     buildTypes {
@@ -90,5 +96,6 @@ dependencies {
     implementation 'com.google.android.material:material:1.0.0-rc01'
     implementation files('libs/BaiduLBS_Android.jar')
     implementation 'org.greenrobot:eventbus:3.1.1'
-    implementation'me.yokeyword:eventbus-activity-scope:1.1.0'
+    implementation 'me.yokeyword:eventbus-activity-scope:1.1.0'
+    implementation files('libs/component_common_sdk_1.1.0.jar')
 }

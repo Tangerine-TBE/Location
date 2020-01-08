@@ -28,9 +28,11 @@ import androidx.core.view.KeyEventDispatcher;
 import com.baidu.location.Address;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.tangerine.UI.eventBean.MapInfoEvent;
+import com.tangerine.UI.infoBean.CoordinateBean;
 import com.tangerine.UI.infoBean.MapInfo;
 import com.tangerine.location.R;
 import com.tangerine.location.fragment.ShowFragment;
+import com.tangerine.location.util.ConvertUtil.PositionConvertUtil;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -113,7 +115,8 @@ public class MainFragment extends ShowFragment implements View.OnClickListener, 
                 break;
             case R.id.btn_start:
                 initLocationManager();
-                setLocation(longitude, latitude);
+                Thread thread = new Thread(new ChangeLocationTask());
+                thread.start();
                 break;
             default:
                 break;
@@ -123,19 +126,18 @@ public class MainFragment extends ShowFragment implements View.OnClickListener, 
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onEventInfoChange(MapInfoEvent event) {
         if (event != null) {
-            Address address = event.address;
             MapInfo mapInfo = event.mapInfo;
-            latitude = mapInfo.x;
-            longitude = mapInfo.y;
-            setData(address, mapInfo);
-            Log.e(TAG, "onMapInfoChangeEvent: " + address.address + mapInfo.y + mapInfo.x);
+           CoordinateBean coordinateBean =  PositionConvertUtil.bd09tToGcj02(mapInfo.x,mapInfo.y);
+            latitude = coordinateBean.getLatitude();
+            longitude =  coordinateBean.getLongitude();
+            setData( mapInfo);
         }
     }
 
-    private void setData(Address address, MapInfo mapInfo) {
-        String strAddress = address.address;
-        String country = address.country;
-        String province = address.province;
+    private void setData(  MapInfo mapInfo) {
+        String strAddress = mapInfo.address;
+        String country = mapInfo.country;
+        String province = mapInfo.province;
         tvTarAddress.setText(strAddress.replace(country, "").replace(province, ""));
         tvTarCountry.setText(country);
         tvTarProvince.setText(province);
@@ -151,12 +153,12 @@ public class MainFragment extends ShowFragment implements View.OnClickListener, 
 
     private boolean changeLocation() {
         LocationManager mLocationManager = (LocationManager) _mActivity.getSystemService(Context.LOCATION_SERVICE);
-        if (!mLocationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+        if (!mLocationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)) {
             return false;
         }
         try {
-            mLocationManager.addTestProvider(LocationManager.GPS_PROVIDER, false, false, false, false, true, true, true, 0, 5);
-            mLocationManager.setTestProviderEnabled(LocationManager.GPS_PROVIDER, true);
+            mLocationManager.addTestProvider(LocationManager.NETWORK_PROVIDER, false, false, false, false, true, true, true, 0, 5);
+            mLocationManager.setTestProviderEnabled(LocationManager.NETWORK_PROVIDER, true);
 
         } catch (Exception e) {
             return false;
@@ -173,7 +175,7 @@ public class MainFragment extends ShowFragment implements View.OnClickListener, 
     private void initLocationManager() {
         mLocationManager = (LocationManager) _mActivity.getSystemService(Context.LOCATION_SERVICE);
         assert mLocationManager != null;
-        mLocationManager.addTestProvider(mLocationProvider, false, true, false, true, true, true, true, 0, 5);
+        mLocationManager.addTestProvider(mLocationProvider, true, true, true, true, true, true, true, 0, 5);
         mLocationManager.setTestProviderEnabled(mLocationProvider, true);
         mLocationManager.requestLocationUpdates(mLocationProvider, 0, 0, this);
     }
@@ -228,10 +230,11 @@ public class MainFragment extends ShowFragment implements View.OnClickListener, 
         public void run() {
             while (run){
                 try {
-                    Thread.sleep(1000);
+                    Thread.sleep(500);
                 }catch (Exception e){
                     return;
                 }
+                setLocation(longitude, latitude);
             }
         }
     }
