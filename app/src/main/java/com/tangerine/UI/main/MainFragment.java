@@ -32,6 +32,7 @@ import com.tangerine.UI.infoBean.CoordinateBean;
 import com.tangerine.UI.infoBean.MapInfo;
 import com.tangerine.location.R;
 import com.tangerine.location.fragment.ShowFragment;
+import com.tangerine.location.util.ConvertUtil.Coordinate;
 import com.tangerine.location.util.ConvertUtil.PositionConvertUtil;
 
 import org.greenrobot.eventbus.EventBus;
@@ -234,7 +235,7 @@ public class MainFragment extends ShowFragment implements View.OnClickListener, 
                 }catch (Exception e){
                     return;
                 }
-                setLocation(longitude, latitude);
+                setLocation(112.8978854500, 23.1693830900);
             }
         }
     }

@@ -2,6 +2,13 @@ package com.tangerine.location.util.ConvertUtil;
 
 import com.tangerine.UI.infoBean.CoordinateBean;
 
+import java.math.BigDecimal;
+
+import static java.lang.Math.atan2;
+import static java.lang.Math.cos;
+import static java.lang.Math.sin;
+import static java.lang.Math.sqrt;
+
 public class PositionConvertUtil {
     private static final double A = 6378245.0;
     private static final double PI = 3.1415926535897932384626;
@@ -10,7 +17,7 @@ public class PositionConvertUtil {
     private static final double LAT_BOUNDARY_MIN = 0.8293;
     private static final double LON_BOUNDARY_MAX = 137.8347;
     private static final double LAT_BOUNDARY_MAX = 55.8271;
-    private static final double X_PI = 3.14159265358979324 * 3000.0 / 180.0;
+    private static final double X_PI = 3.141592653589793 * 3000.0 / 180.0;
 
     /**
      * wgs84  to   gcj02
@@ -28,11 +35,11 @@ public class PositionConvertUtil {
             double dLat = transformLat(lon - 105.0, lat - 35.0);
             double dLon = transformLon(lon - 105.0, lat - 35.0);
             double radLat = lat / 180.0 * PI;
-            double magic = Math.sin(radLat);
+            double magic = sin(radLat);
             magic = 1 - EE * magic * magic;
-            double sqrtMagic = Math.sqrt(magic);
+            double sqrtMagic = sqrt(magic);
             dLat = (dLat * 180.0) / ((A * (1 - EE)) / (magic * sqrtMagic) * PI);
-            dLon = (dLon * 180.0) / (A / sqrtMagic * Math.cos(radLat) * PI);
+            dLon = (dLon * 180.0) / (A / sqrtMagic * cos(radLat) * PI);
             double mgLat = lat + dLat;
             double mgLon = lon + dLon;
             info.setChina(true);
@@ -67,13 +74,19 @@ public class PositionConvertUtil {
      * @return coordinate
      */
     public static  CoordinateBean bd09tToGcj02(double bdLat,double bdLon){
-        double x = bdLon - 0.0065;
-        double y = bdLat - 0.006;
-        double z = Math.sqrt(x * x + y * y) - 0.00002 * Math.sin(y * X_PI);
-        double theta = Math.atan2(y, x) - 0.000003 * Math.cos(x * X_PI);
-        double ggLng = z * Math.cos(theta);
-        double ggLat = z * Math.sin(theta);
-        return new CoordinateBean(ggLng,ggLat);
+        double x = bdLon - 0.0065, y = bdLat - 0.006;
+        double z = sqrt(x * x + y * y) - 0.00002 * sin(y * X_PI);
+        double theta = atan2(y, x) - 0.000003 * cos(x * X_PI);
+        double gg_lon = z * cos(theta);
+        double gg_lat = z * sin(theta);
+        BigDecimal lat = new BigDecimal(gg_lat);
+        BigDecimal lon = new BigDecimal(gg_lon);
+//        double z = Math.sqrt(bdLon * bdLon + bdLat * bdLat) + 0.00002 * Math.sin(bdLat * X_PI);
+//        double theta = Math.atan2(bdLat, bdLon) + 0.000003 * Math.cos(bdLon * X_PI);
+//        double bd_lon = z * Math.cos(theta) + 0.0065;
+//        double bd_lat = z * Math.sin(theta) + 0.006;
+        return new CoordinateBean(gg_lon, gg_lat);
+
     }
 
 
@@ -86,10 +99,10 @@ public class PositionConvertUtil {
      * @return coordinate
      */
     public CoordinateBean gcj02ToBd09(double lat, double lon){
-        double z = Math.sqrt(lon * lon + lat * lat) + 0.00002 * Math.sin(lat * X_PI);
-        double theta = Math.atan2(lat, lon) + 0.000003 * Math.cos(lon * X_PI);
-        double bdLng = z * Math.cos(theta) + 0.0065;
-        double bdLat = z * Math.sin(theta) + 0.006;
+        double z = sqrt(lon * lon + lat * lat) + 0.00002 * sin(lat * X_PI);
+        double theta = atan2(lat, lon) + 0.000003 * cos(lon * X_PI);
+        double bdLng = z * cos(theta) + 0.0065;
+        double bdLat = z * sin(theta) + 0.006;
         return new CoordinateBean(bdLng,bdLat);
     }
 
@@ -121,18 +134,18 @@ public class PositionConvertUtil {
 
     private double transformLon(double x, double y) {
         double ret = 300.0 + x + 2.0 * y + 0.1 * x * x + 0.1 * x * y + 0.1
-                * Math.sqrt(Math.abs(x));
-        ret += (20.0 * Math.sin(6.0 * x * PI) + 20.0 * Math.sin(2.0 * x * PI)) * 2.0 / 3.0;
-        ret += (20.0 * Math.sin(x * PI) + 40.0 * Math.sin(x / 3.0 * PI)) * 2.0 / 3.0;
-        ret += (150.0 * Math.sin(x / 12.0 * PI) + 300.0 * Math.sin(x / 30.0 * PI)) * 2.0 / 3.0;
+                * sqrt(Math.abs(x));
+        ret += (20.0 * sin(6.0 * x * PI) + 20.0 * sin(2.0 * x * PI)) * 2.0 / 3.0;
+        ret += (20.0 * sin(x * PI) + 40.0 * sin(x / 3.0 * PI)) * 2.0 / 3.0;
+        ret += (150.0 * sin(x / 12.0 * PI) + 300.0 * sin(x / 30.0 * PI)) * 2.0 / 3.0;
         return ret;
     }
 
     private double transformLat(double lng,double lat) {
-        double ret = -100.0 + 2.0 * lng + 3.0 * lat + 0.2 * lat * lat + 0.1 * lng * lat + 0.2 * Math.sqrt(Math.abs(lng));
-        ret += (20.0 * Math.sin(6.0 * lng * PI) + 20.0 * Math.sin(2.0 * lng * PI)) * 2.0 / 3.0;
-        ret += (20.0 * Math.sin(lat * PI) + 40.0 * Math.sin(lat / 3.0 * PI)) * 2.0 / 3.0;
-        ret += (160.0 * Math.sin(lat / 12.0 * PI) + 320 * Math.sin(lat * PI / 30.0)) * 2.0 / 3.0;
+        double ret = -100.0 + 2.0 * lng + 3.0 * lat + 0.2 * lat * lat + 0.1 * lng * lat + 0.2 * sqrt(Math.abs(lng));
+        ret += (20.0 * sin(6.0 * lng * PI) + 20.0 * sin(2.0 * lng * PI)) * 2.0 / 3.0;
+        ret += (20.0 * sin(lat * PI) + 40.0 * sin(lat / 3.0 * PI)) * 2.0 / 3.0;
+        ret += (160.0 * sin(lat / 12.0 * PI) + 320 * sin(lat * PI / 30.0)) * 2.0 / 3.0;
         return ret;
     }
 
@@ -147,11 +160,11 @@ public class PositionConvertUtil {
         double dLat = transformLat(lon - 105.0, lat - 35.0);
         double dLon = transformLon(lon - 105.0, lat - 35.0);
         double radLat = lat / 180.0 * PI;
-        double magic = Math.sin(radLat);
+        double magic = sin(radLat);
         magic = 1 - EE * magic * magic;
-        double sqrtMagic = Math.sqrt(magic);
+        double sqrtMagic = sqrt(magic);
         dLat = (dLat * 180.0) / ((A * (1 - EE)) / (magic * sqrtMagic) * PI);
-        dLon = (dLon * 180.0) / (A / sqrtMagic * Math.cos(radLat) * PI);
+        dLon = (dLon * 180.0) / (A / sqrtMagic * cos(radLat) * PI);
         double mgLat = lat + dLat;
         double mgLon = lon + dLon;
         info.setChina(true);
