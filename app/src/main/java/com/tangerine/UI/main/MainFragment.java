@@ -11,6 +11,7 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.SystemClock;
 import android.provider.Settings;
 import android.text.TextUtils;
@@ -21,19 +22,13 @@ import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.widget.AppCompatButton;
 import androidx.appcompat.widget.AppCompatTextView;
-import androidx.core.content.ContextCompat;
-import androidx.core.location.LocationManagerCompat;
-import androidx.core.view.KeyEventDispatcher;
-
-import com.baidu.location.Address;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.tangerine.UI.eventBean.MapInfoEvent;
-import com.tangerine.UI.infoBean.CoordinateBean;
 import com.tangerine.UI.infoBean.MapInfo;
 import com.tangerine.location.R;
 import com.tangerine.location.fragment.ShowFragment;
-import com.tangerine.location.util.ConvertUtil.Coordinate;
 import com.tangerine.location.util.ConvertUtil.PositionConvertUtil;
+import com.wang.avi.AVLoadingIndicatorView;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -61,10 +56,13 @@ public class MainFragment extends ShowFragment implements View.OnClickListener, 
     AppCompatTextView tvTarProvince = null;
     @BindView(R.id.tag)
     AppCompatTextView tvTarTag = null;
+    @BindView(R.id.avi)
+    AVLoadingIndicatorView Avi = null;
     private LocationManager mLocationManager;
     private double longitude;
     private double latitude;
-
+    private boolean startLocation;
+    private static ChangeLocationTask task;
 
     @Override
     public Object setLayout() {
@@ -115,9 +113,24 @@ public class MainFragment extends ShowFragment implements View.OnClickListener, 
                 startActivity(intent);
                 break;
             case R.id.btn_start:
-                initLocationManager();
-                Thread thread = new Thread(new ChangeLocationTask());
-                thread.start();
+                //启动
+                if (!startLocation){
+                    Avi.show();
+                    new Handler().postDelayed(() -> {
+                        initLocationManager();
+                        task = new ChangeLocationTask();
+                        Thread thread = new Thread(task);
+                        thread.start();
+                        startLocation = true;
+                        Avi.hide();
+                        btnStart.setText("停止模拟");
+                    },2000);
+                }else{
+                    task.stop();
+                    startLocation = false;
+                    btnStart.setText("启动模拟");
+
+                }
                 break;
             default:
                 break;
@@ -128,9 +141,9 @@ public class MainFragment extends ShowFragment implements View.OnClickListener, 
     public void onEventInfoChange(MapInfoEvent event) {
         if (event != null) {
             MapInfo mapInfo = event.mapInfo;
-           CoordinateBean coordinateBean =  PositionConvertUtil.bd09tToGcj02(mapInfo.x,mapInfo.y);
-            latitude = coordinateBean.getLatitude();
-            longitude =  coordinateBean.getLongitude();
+           double[] coordinate  =  PositionConvertUtil.bd09_To_gps84(mapInfo.x,mapInfo.y);
+            latitude = coordinate[0];
+            longitude =  coordinate[1];
             setData( mapInfo);
         }
     }
@@ -176,16 +189,39 @@ public class MainFragment extends ShowFragment implements View.OnClickListener, 
     private void initLocationManager() {
         mLocationManager = (LocationManager) _mActivity.getSystemService(Context.LOCATION_SERVICE);
         assert mLocationManager != null;
-        mLocationManager.addTestProvider(mLocationProvider, true, true, true, true, true, true, true, 0, 5);
-        mLocationManager.setTestProviderEnabled(mLocationProvider, true);
+        try{
+            mLocationManager.addTestProvider(mLocationProvider, true, true, true, true, true, true, true, 0, 5);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        try {
+            mLocationManager.setTestProviderEnabled(mLocationProvider, true);
+        }catch (Exception e){
+            startDevelopmentActivity();
+        }
         mLocationManager.requestLocationUpdates(mLocationProvider, 0, 0, this);
     }
-    private void openTestProviderLocationException(){
-        Intent intent = new Intent("//");
-        ComponentName cm = new ComponentName("com.android.settings","com.android.setting.DevelopmentSetting");
-        intent.setComponent(cm);
-        intent.setAction("android.intent.action.VIEW");
-        _mActivity.startActivity(intent);
+    private void startDevelopmentActivity() {
+        try {
+            Intent intent = new Intent(Settings.ACTION_APPLICATION_DEVELOPMENT_SETTINGS);
+            startActivity(intent);
+        } catch (Exception e) {
+            try {
+                ComponentName componentName = new ComponentName("com.android.settings", "com.android.settings.DevelopmentSettings");
+                Intent intent = new Intent();
+                intent.setComponent(componentName);
+                intent.setAction("android.intent.action.View");
+                startActivity(intent);
+            } catch (Exception e1) {
+                try {
+                    Intent intent = new Intent("com.android.settings.APPLICATION_DEVELOPMENT_SETTINGS");//部分小米手机采用这种方式跳转
+                    startActivity(intent);
+                } catch (Exception e2) {
+
+                }
+
+            }
+        }
     }
 
     @Override
@@ -235,7 +271,7 @@ public class MainFragment extends ShowFragment implements View.OnClickListener, 
                 }catch (Exception e){
                     return;
                 }
-                setLocation(112.8978854500, 23.1693830900);
+                setLocation(longitude, latitude);
             }
         }
     }

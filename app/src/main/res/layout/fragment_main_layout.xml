@@ -69,7 +69,6 @@
         <androidx.cardview.widget.CardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-
             android:layout_marginLeft="16dp"
 
             android:layout_marginRight="16dp">
@@ -142,18 +141,32 @@
                         android:textColor="@color/colorPrimary" />
                 </androidx.appcompat.widget.LinearLayoutCompat>
 
-                <androidx.appcompat.widget.LinearLayoutCompat
+                <RelativeLayout
+                    android:layout_marginTop="12dp"
+                    android:layout_marginBottom="6dp"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content">
 
                     <androidx.appcompat.widget.AppCompatButton
-                        android:layout_marginTop="14dp"
                         android:id="@+id/btn_start"
                         android:background="@drawable/btn_style_backgound"
                         android:layout_width="wrap_content"
+                        android:layout_centerVertical="true"
                         android:layout_height="28dp"
                         android:text="启动模拟" />
-                </androidx.appcompat.widget.LinearLayoutCompat>
+                    <com.wang.avi.AVLoadingIndicatorView
+                        android:layout_toRightOf="@+id/btn_start"
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:layout_centerVertical="true"
+                        android:layout_marginLeft="6dp"
+                        android:id="@+id/avi"
+                        android:visibility="gone"
+                        app:indicatorColor="@color/colorPrimary"
+                        app:indicatorName="BallClipRotateIndicator"/>
+                </RelativeLayout>
+
+
 
             </androidx.appcompat.widget.LinearLayoutCompat>
         </androidx.cardview.widget.CardView>
