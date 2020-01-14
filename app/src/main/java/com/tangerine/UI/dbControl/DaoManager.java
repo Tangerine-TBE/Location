@@ -1,10 +1,10 @@
 package com.tangerine.UI.dbControl;
 
+
 import com.application.AppStart;
 import com.application.ConfiguratorType;
-import com.tangerine.UI.dbBean.UserBean;
+import com.tangerine.UI.infoBean.MapInfo;
 
-import java.util.List;
 
 import io.objectbox.Box;
 import io.objectbox.BoxStore;
@@ -19,17 +19,20 @@ public class DaoManager {
         return daoManager;
     }
     public  BoxStore boxStore;
-    public static Box<UserBean> userBeanBox;
+    public static Box<MapInfo> mapInfoBox;
     public void init(){
         boxStore = (BoxStore) AppStart.getConfigurations().get(ConfiguratorType.BOXSTORE.name());
         assert boxStore != null;
-        userBeanBox = boxStore.boxFor(UserBean.class);
+        mapInfoBox =  boxStore.boxFor(MapInfo.class);
     }
-    public static void addUser(UserBean userBean){
-        userBeanBox.put(userBean);
+    public  static void addMapInfo(MapInfo mapInfo){
+        QueryBuilder<MapInfo> builder = mapInfoBox.query();
+        builder.build().remove();
+        mapInfoBox.put(mapInfo);
     }
-    public static List<UserBean> queryUser(){
-        QueryBuilder<UserBean> builder = userBeanBox.query();
-      return   builder.build().find();
+    public static MapInfo queryMapInfo(){
+        QueryBuilder<MapInfo> builder = mapInfoBox.query();
+        return builder.build().findFirst();
     }
+
 }

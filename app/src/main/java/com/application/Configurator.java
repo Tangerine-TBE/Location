@@ -9,15 +9,18 @@ import com.baidu.mapapi.CoordType;
 import com.baidu.mapapi.SDKInitializer;
 import com.joanzapata.iconify.IconFontDescriptor;
 import com.joanzapata.iconify.Iconify;
-import com.tangerine.UI.dbBean.MyObjectBox;
 import com.tangerine.UI.dbControl.DaoManager;
+import com.tangerine.UI.infoBean.MyObjectBox;
 import com.tangerine.location.BuildConfig;
+import com.tencent.bugly.Bugly;
+import com.tencent.bugly.beta.Beta;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 
 import io.objectbox.BoxStore;
 import io.objectbox.android.AndroidObjectBrowser;
+
 
 public class Configurator {
     private static final HashMap<String, Object> LO_CONFIGS = new HashMap<>();
@@ -79,6 +82,17 @@ public class Configurator {
     public final Configurator withIcon(IconFontDescriptor descriptor){
         DESCRIPTORS.add(descriptor);
 
+        return this;
+    }
+    public final Configurator withBugly(Context context){
+        Beta.autoCheckUpgrade = true;
+        Beta.canNotifyUserRestart =true;
+        if (BuildConfig.DEBUG){
+            Bugly.init(context.getApplicationContext(),"3d2693e91a",BuildConfig.DEBUGGABLE);
+        }else{
+            Bugly.init(context.getApplicationContext(),"b6e6e7388e",BuildConfig.DEBUGGABLE);
+
+        }
         return this;
     }
     private void intIcons(){

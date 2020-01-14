@@ -1,11 +1,9 @@
 package com.tangerine.UI.main;
 
-import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -22,10 +20,8 @@ import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.widget.AppCompatButton;
 import androidx.appcompat.widget.AppCompatTextView;
-import androidx.core.content.ContextCompat;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.tangerine.UI.dbBean.UserBean;
 import com.tangerine.UI.dbControl.DaoManager;
 import com.tangerine.UI.eventBean.MapInfoEvent;
 import com.tangerine.UI.infoBean.MapInfo;
@@ -39,10 +35,7 @@ import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
 
-import java.util.List;
-
 import butterknife.BindView;
-import io.objectbox.query.QueryBuilder;
 
 
 public class MainFragment extends ShowFragment implements View.OnClickListener, LocationListener {
@@ -70,6 +63,7 @@ public class MainFragment extends ShowFragment implements View.OnClickListener, 
     private double latitude;
     private boolean startLocation;
     private static ChangeLocationTask task;
+    private MapInfo mapInfo;
 
     @Override
     public Object setLayout() {
@@ -83,6 +77,14 @@ public class MainFragment extends ShowFragment implements View.OnClickListener, 
 
     @Override
     public void onLazyInitView(@Nullable Bundle savedInstanceState) {
+        mapInfo = DaoManager.queryMapInfo();
+        if (mapInfo != null){
+            double[] coordinate  =  PositionConvertUtil.bd09_To_gps84(mapInfo.x,mapInfo.y);
+            latitude = coordinate[0];
+            longitude =  coordinate[1];
+            setData(mapInfo);
+        }
+
     }
 
     private void initView() {
@@ -114,6 +116,11 @@ public class MainFragment extends ShowFragment implements View.OnClickListener, 
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.fb_add_area:
+                if (startLocation){
+                    task.stop();
+                    startLocation = false;
+                    btnStart.setText("启动模拟");
+                }
                 Intent intent = new Intent(getBaseActivity(), MapActivity.class);
                 startActivity(intent);
                 break;
@@ -282,4 +289,5 @@ public class MainFragment extends ShowFragment implements View.OnClickListener, 
             }
         }
     }
+
 }

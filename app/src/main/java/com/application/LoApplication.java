@@ -12,6 +12,7 @@ public class LoApplication extends Application {
                 .withBaiDuMap(this)
                 .withIcon(new FrontLocationMoudle())
                 .withObjectBox(this)
+                .withBugly(this)
                 .Configure();
 
     }

@@ -36,6 +36,7 @@ import com.baidu.mapapi.search.geocode.OnGetGeoCoderResultListener;
 import com.baidu.mapapi.search.geocode.ReverseGeoCodeOption;
 import com.baidu.mapapi.search.geocode.ReverseGeoCodeResult;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.tangerine.UI.dbControl.DaoManager;
 import com.tangerine.UI.eventBean.MapInfoEvent;
 import com.tangerine.UI.infoBean.MapInfo;
 import com.tangerine.location.R;
@@ -146,6 +147,7 @@ public class MapActivity extends AppCompatActivity implements View.OnClickListen
     public void onClick(View v) {
         switch (v.getId()){
             case R.id.addInfo:
+                DaoManager.addMapInfo(mapInfo);
                 EventBus.getDefault().post(new MapInfoEvent(mapInfo));
                 finish();
                 break;
