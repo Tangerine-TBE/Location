@@ -122,13 +122,14 @@ public class MainFragment extends ShowFragment implements View.OnClickListener, 
                 if (!startLocation){
                     Avi.show();
                     new Handler().postDelayed(() -> {
-                        initLocationManager();
-                        task = new ChangeLocationTask();
-                        Thread thread = new Thread(task);
-                        thread.start();
-                        startLocation = true;
+                        if (initLocationManager()){
+                            task = new ChangeLocationTask();
+                            Thread thread = new Thread(task);
+                            thread.start();
+                            startLocation = true;
+                            btnStart.setText("停止模拟");
+                        }
                         Avi.hide();
-                        btnStart.setText("停止模拟");
                     },2000);
                 }else{
                     task.stop();
@@ -190,7 +191,7 @@ public class MainFragment extends ShowFragment implements View.OnClickListener, 
     }
 
     @SuppressLint("MissingPermission")
-    private void initLocationManager() {
+    private boolean initLocationManager() {
         mLocationManager = (LocationManager) _mActivity.getSystemService(Context.LOCATION_SERVICE);
         assert mLocationManager != null;
         try{
@@ -202,9 +203,10 @@ public class MainFragment extends ShowFragment implements View.OnClickListener, 
             mLocationManager.setTestProviderEnabled(mLocationProvider, true);
         }catch (Exception e){
             startDevelopmentActivity();
-            return;
+            return false;
         }
         mLocationManager.requestLocationUpdates(mLocationProvider, 0, 0, this);
+        return true;
     }
     private void startDevelopmentActivity() {
         try {

@@ -57,6 +57,7 @@ android {
         }
         debug{
             buildConfigField "Boolean","DEBUGGABLE","true"
+            signingConfig signingConfigs.release
             buildConfigField "String","BUGLY_ID","\"${bugly_id_debug}\""
             debuggable true
 
