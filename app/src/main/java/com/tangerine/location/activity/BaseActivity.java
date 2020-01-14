@@ -7,12 +7,9 @@ import android.os.Bundle;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.ContentFrameLayout;
-import androidx.core.content.ContextCompat;
-
 import com.tangerine.location.R;
 import com.tangerine.location.fragment.ShowFragment;
 
-import me.yokeyword.eventbusactivityscope.EventBusActivityScope;
 import me.yokeyword.fragmentation.SupportActivity;
 
 public abstract class BaseActivity extends SupportActivity {

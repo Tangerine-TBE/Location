@@ -22,6 +22,8 @@ import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.widget.AppCompatButton;
 import androidx.appcompat.widget.AppCompatTextView;
+import androidx.core.content.ContextCompat;
+
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.tangerine.UI.eventBean.MapInfoEvent;
 import com.tangerine.UI.infoBean.MapInfo;
@@ -129,7 +131,6 @@ public class MainFragment extends ShowFragment implements View.OnClickListener, 
                     task.stop();
                     startLocation = false;
                     btnStart.setText("启动模拟");
-
                 }
                 break;
             default:
@@ -198,6 +199,7 @@ public class MainFragment extends ShowFragment implements View.OnClickListener, 
             mLocationManager.setTestProviderEnabled(mLocationProvider, true);
         }catch (Exception e){
             startDevelopmentActivity();
+            return;
         }
         mLocationManager.requestLocationUpdates(mLocationProvider, 0, 0, this);
     }
