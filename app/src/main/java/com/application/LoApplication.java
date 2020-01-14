@@ -11,6 +11,7 @@ public class LoApplication extends Application {
         AppStart.init(this)
                 .withBaiDuMap(this)
                 .withIcon(new FrontLocationMoudle())
+                .withObjectBox(this)
                 .Configure();
 
     }

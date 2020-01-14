@@ -25,6 +25,8 @@ import androidx.appcompat.widget.AppCompatTextView;
 import androidx.core.content.ContextCompat;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.tangerine.UI.dbBean.UserBean;
+import com.tangerine.UI.dbControl.DaoManager;
 import com.tangerine.UI.eventBean.MapInfoEvent;
 import com.tangerine.UI.infoBean.MapInfo;
 import com.tangerine.location.R;
@@ -37,7 +39,10 @@ import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
 
+import java.util.List;
+
 import butterknife.BindView;
+import io.objectbox.query.QueryBuilder;
 
 
 public class MainFragment extends ShowFragment implements View.OnClickListener, LocationListener {
@@ -78,7 +83,6 @@ public class MainFragment extends ShowFragment implements View.OnClickListener, 
 
     @Override
     public void onLazyInitView(@Nullable Bundle savedInstanceState) {
-
     }
 
     private void initView() {
@@ -90,7 +94,6 @@ public class MainFragment extends ShowFragment implements View.OnClickListener, 
             tvTarTag.setVisibility(View.INVISIBLE);
             tvTarCoordinate.setVisibility(View.INVISIBLE);
         }
-
     }
 
     @Override

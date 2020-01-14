@@ -6,8 +6,11 @@ buildscript {
         jcenter()
     }
     dependencies {
+        ext.objectboxVersion = '2.5.0'
         classpath 'com.android.tools.build:gradle:3.5.3'
         classpath 'com.jakewharton:butterknife-gradle-plugin:10.0.0'
+        classpath "io.objectbox:objectbox-gradle-plugin:$objectboxVersion"
+
 
 
         // NOTE: Do not place your application dependencies here; they belong
