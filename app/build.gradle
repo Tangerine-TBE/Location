@@ -32,7 +32,7 @@ android {
     }
     signingConfigs {
         release {
-            storeFile file('..tangerine.jks')
+            storeFile file('../tangerine.jks')
             storePassword 'tan100344'
             keyAlias 'tangerine'
             keyPassword 'tan100344'
