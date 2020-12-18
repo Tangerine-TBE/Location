@@ -51,12 +51,12 @@ android {
             buildConfigField "String","BUGLY_ID","\"${bugly_id_release}\""
             debuggable false
             minifyEnabled false
-            signingConfig signingConfigs.release
+//            signingConfig signingConfigs.release
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
         debug{
             buildConfigField "Boolean","DEBUGGABLE","true"
-            signingConfig signingConfigs.release
+//            signingConfig signingConfigs.release
             buildConfigField "String","BUGLY_ID","\"${bugly_id_debug}\""
             debuggable true
 
