@@ -46,7 +46,7 @@
         </activity>
         <meta-data
             android:name="com.baidu.lbsapi.API_KEY"
-            android:value="bmWBNepuPIQyienbEoc0G13H6danSyIr"/>
+            android:value="Rb6m3k8hintkqPgR4Z4n5GumznVBzlLo"/>
         <activity android:name="com.tangerine.UI.main.MapActivity"/>
         <service android:name="com.baidu.location.f"
             android:enabled="true"

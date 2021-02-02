@@ -32,7 +32,7 @@ android {
     }
     signingConfigs {
         release {
-            storeFile file('D:\\androidProjects\\Location\\tangerine.jks')
+            storeFile file('C:\\Users\\Administrator\\Desktop\\location.jks')
             storePassword '100344'
             keyAlias 'location'
             keyPassword '100344'
@@ -53,10 +53,11 @@ android {
             minifyEnabled false
 //            signingConfig signingConfigs.release
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.release
         }
         debug{
             buildConfigField "Boolean","DEBUGGABLE","true"
-//            signingConfig signingConfigs.release
+            signingConfig signingConfigs.release
             buildConfigField "String","BUGLY_ID","\"${bugly_id_debug}\""
             debuggable true
 
