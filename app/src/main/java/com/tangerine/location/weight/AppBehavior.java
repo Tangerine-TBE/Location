@@ -12,6 +12,7 @@ import androidx.coordinatorlayout.widget.CoordinatorLayout;
 
 import com.google.android.material.appbar.AppBarLayout;
 
+
 public class AppBehavior extends AppBarLayout.Behavior {
     public AppBehavior() {
         super();

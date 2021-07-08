@@ -1,7 +1,6 @@
 package com.tangerine.UI;
 
 import android.util.Log;
-import android.widget.Toast;
 
 import com.tangerine.UI.launcher.ILauncherListener;
 import com.tangerine.UI.launcher.LauncherFragment;
