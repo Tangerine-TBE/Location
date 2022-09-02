@@ -32,9 +32,9 @@ android {
     }
     signingConfigs {
         release {
-            storeFile file('C:\\Users\\Administrator\\Desktop\\location.jks')
+            storeFile file('..\\location.jks')
             storePassword '100344'
-            keyAlias 'location'
+            keyAlias 'tangerine'
             keyPassword '100344'
         }
     }
